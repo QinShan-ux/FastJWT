@@ -7,6 +7,6 @@ class Teacher(Model):
     address = fields.CharField(max_length=100)
     account = fields.CharField(max_length=100)
     password = fields.CharField(max_length=100)
-    id = fields.IntField(pk=True)
+    id = fields.IntField(pk=True,auto=True,generated=True)
 
 

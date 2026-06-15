@@ -11,7 +11,6 @@ class TeacherCreate(BaseModel):
     address: str
     account: str
     password: str
-    id: int
 
 router = APIRouter(
     prefix="/teacher",
@@ -31,7 +30,7 @@ async def get_teacher(
     return res
 
 
-@router.post("/",summary="添加教师信息",description="添加教师信息")
+@router.post("/add",summary="添加教师信息",description="添加教师信息")
 async def add_teacher(teacher: TeacherCreate):
     res = await Teacher.create(
         name=teacher.name,
@@ -39,6 +38,5 @@ async def add_teacher(teacher: TeacherCreate):
         address=teacher.address,
         account=teacher.account,
         password=teacher.password,
-        id=teacher.id
     )
-    return {"id": teacher.id, "username": teacher.name}
+    return res

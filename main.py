@@ -3,19 +3,21 @@ from typing import Annotated
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from starlette import status
 from tortoise.contrib.fastapi import register_tortoise
 from apps.core.security import get_current_user,login
+from apps.routers import teacherRouter
 
 from settings import TORTOISE_ORM
-from apps.routers import teacherRouter
+from apps.middlewares import register_custom_middleware
+
 
 
 class Login(BaseModel):
-    account: str
-    password: str
-    type:str
+    account: str = Field(default="linan")
+    password: str = Field(default="1234")
+    type:str = Field(default="teacher")
 
 class Token(BaseModel):
     access_token: str
@@ -24,8 +26,10 @@ class Token(BaseModel):
 
 app = FastAPI()
 
-
+# 注册路由
 app.include_router(teacherRouter.router)
+# 注册中间件
+register_custom_middleware(app)
 
 # 该方法会在fastapi启动时触发，内部通过传递进去的app对象，监听服务启动和终止事件
 # 当检测到启动事件时，会初始化Tortoise对象，如果generate_schemas为True则还会进行数据库迁移

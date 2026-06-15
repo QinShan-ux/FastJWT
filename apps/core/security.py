@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta, datetime, timezone
 import jwt
 from jwt import PyJWTError
@@ -47,6 +46,7 @@ async def get_current_user(authorization: Annotated[str | None, Depends(api_key_
         # jwt.decode 会自动验证 exp 过期时间，无需手动检查
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
+        account: str = payload.get("account")
         role: str = payload.get("role")
 
         if username is None or role is None:
@@ -56,7 +56,7 @@ async def get_current_user(authorization: Annotated[str | None, Depends(api_key_
         raise credentials_exception
 
     # 从数据库查询真实用户信息
-    user = await get_user_from_db(username, role)
+    user = await get_user_from_db(account, role)
     if user is None or user.get("disabled"):
         raise credentials_exception
 
@@ -75,13 +75,13 @@ async def authenticate_user(account: str, password: str, type: str):
     if type == "teacher":
         verify = await verify_teacher(account, password)
         if verify["flag"]:
-            return {"username": verify["name"], "id": verify["id"],"role":"teacher"}
+            return {"username": verify["name"], "id": verify["id"],"role":"teacher","account":account}
         else:
             return verify
     else:
         verify = await verify_student(account, password)
         if verify["flag"]:
-            return {"username": verify["name"], "id": verify["id"],"role":"student"}
+            return {"username": verify["name"], "id": verify["id"],"role":"student","account":account}
         else:
             return verify
 
