@@ -1,9 +1,31 @@
-import uvicorn
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+from starlette import status
 from tortoise.contrib.fastapi import register_tortoise
+from apps.core.security import get_current_user,login
 
 from settings import TORTOISE_ORM
+from apps.routers import teacherRouter
+
+
+class Login(BaseModel):
+    account: str
+    password: str
+    type:str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
 app = FastAPI()
+
+
+app.include_router(teacherRouter.router)
 
 # 该方法会在fastapi启动时触发，内部通过传递进去的app对象，监听服务启动和终止事件
 # 当检测到启动事件时，会初始化Tortoise对象，如果generate_schemas为True则还会进行数据库迁移
@@ -26,3 +48,14 @@ async def root():
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
+
+@app.post("/token")
+async def login_for_access_token(
+    form_data:  Login,
+) -> Token:
+    access_token = await login(form_data.account, form_data.password,form_data.type)
+    return Token(access_token="Bearer " + access_token, token_type="bearer")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

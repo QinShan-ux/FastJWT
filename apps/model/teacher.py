@@ -9,3 +9,4 @@ class Teacher(Model):
     password = fields.CharField(max_length=100)
     id = fields.IntField(pk=True)
 
+

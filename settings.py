@@ -20,7 +20,7 @@ TORTOISE_ORM = {
         'models': {
             #这个models就是自己配置的models.py位置
 
-            'models': ['apps.models'],
+            'models': ['apps.model.teacher', 'apps.model.course', 'apps.model.student', 'apps.model.student','apps.model.clas'],
             'default_connection': 'default',
 
         }
